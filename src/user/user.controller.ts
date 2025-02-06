@@ -2,17 +2,15 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
   Patch,
-  Post,
   Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from './dto/create-user.dto';
-import { GetUsersParamDto } from './dto/get-users-param.dto';
-import { PatchUserDto } from './dto/patch-user.dto';
+import { User } from './entity/user.entity';
 import { UserService } from './user.service';
 
 @Controller('users')
@@ -20,7 +18,7 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('/:id')
+  @Get()
   @ApiOperation({
     summary: 'Fetches a list of registered users on the application.',
   })
@@ -41,21 +39,28 @@ export class UserController {
     status: 200,
     description: 'Users fetched successfully based on the query',
   })
-  public async getUsers(
-    @Param() getUserParamDto: GetUsersParamDto,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  public async getAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ) {
-    return this.userService.findAll(getUserParamDto, limit, page);
+    return this.userService.getAll({ page, limit });
   }
 
-  @Post()
-  public async createUser(@Body() createUserDto: CreateUserDto) {
-    return this.userService.createUser(createUserDto);
+  @Get(':id')
+  public async getById(@Param('id') id: string): Promise<User> {
+    return this.userService.getById(id);
   }
 
-  @Patch()
-  public async patchUser(@Body() patchUserDto: PatchUserDto) {
-    return patchUserDto;
+  @Patch(':id')
+  public async updateById(
+    @Param('id') id: string,
+    @Body() body: Partial<User>,
+  ): Promise<User> {
+    return this.userService.updateById(id, body);
+  }
+
+  @Delete(':id')
+  public async deleteById(@Param('id') id: string): Promise<boolean> {
+    return this.userService.deleteById(id);
   }
 }

@@ -8,11 +8,11 @@ import { Tag } from './entity/tag.entity';
 export class TagService {
   constructor(
     @InjectModel(Tag.name)
-    private readonly tagsModel: Model<Tag>,
+    private readonly tagRepository: Model<Tag>,
   ) {}
 
   public async createTag(createTagDto: CreateTagDto) {
-    const newTag = new this.tagsModel(createTagDto);
+    const newTag = new this.tagRepository(createTagDto);
     return await newTag.save();
   }
 }
